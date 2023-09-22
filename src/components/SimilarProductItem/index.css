@@ -1,1 +1,28 @@
 /* Write your CSS here */
+.similar-product-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.similar-image {
+  height: 50px;
+  width: 50px;
+}
+.similar-title {
+  color: #12022f;
+}
+.similar-brand {
+  color: #475569;
+}
+.product-bottom-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.rating-btn {
+  display: flex;
+}
+.star-img {
+  height: 10px;
+  width: 10px;
+}

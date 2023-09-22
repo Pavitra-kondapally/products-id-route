@@ -1,1 +1,80 @@
 /* Write your CSS here */
+.failure-view-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.failure-image {
+  height: 200px;
+  width: 300px;
+}
+.failure-heading {
+  color: #12022f;
+}
+.continue-btn {
+  height: 30px;
+  width: 150px;
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+.product-container {
+  display: flex;
+  flex-direction: row;
+}
+.product-image {
+  height: 300px;
+  width: 200px;
+}
+.product-text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.product-title {
+  color: #1e293b;
+}
+.product-price {
+  color: #12022f;
+}
+.rating-container {
+  display: flex;
+  flex-direction: row;
+}
+.rating-button {
+  height: 30px;
+  width: 50px;
+  border-radius: 5px;
+  color: #ffffff;
+  background-color: #3b82f6;
+}
+.star-image {
+  height: 10px;
+  width: 10px;
+}
+.reviews-text {
+  color: #171f46;
+}
+.product-description {
+  color: #475569;
+}
+.product-det {
+  color: #1e293b;
+}
+.product-info {
+  color: #475569;
+}
+.horizontal-line {
+  color: #cbced2;
+}
+.cart-items-container {
+  display: flex;
+  flex-direction: row;
+}
+.add-to-cart-btn {
+  height: 30px;
+  width: 100px;
+  background-color: #3b82f6;
+  border-radius: 5px;
+  color: #ffffff;
+}

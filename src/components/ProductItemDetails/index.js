@@ -2,37 +2,59 @@
 import {BsPlusSquare, BsDashSquare} from 'react-icons/bs'
 import Loader from 'react-loader-spinner'
 import {Component} from 'react'
+import Cookies from 'js-cookie'
+
 import SimilarProductItem from '../SimilarProductItem'
 import Header from '../Header'
 import './index.css'
 
 class ProductItemDetails extends Component {
-  state = {productDetails: {}, isLoading: true, quantity: 1}
+  state = {productDetails: {}, isLoading: false, quantity: 1, isError: false}
 
   componentDidMount() {
     this.getProductDetails()
   }
 
   getProductDetails = async () => {
+    this.setState({
+      isLoading: true,
+    })
+    const jwtToken = Cookies.get('jwt_token')
     const {match} = this.props
     const {params} = match
     const {id} = params
-
-    const response = await fetch(`https://apis.ccbp.in/products/${id}`)
-    const data = await response.json()
-
-    const updatedData = {
-      imageUrl: data.image_url,
-      title: data.title,
-      price: data.price,
-      description: data.description,
-      brand: data.brand,
-      totalReviews: data.total_reviews,
-      rating: data.rating,
-      availability: data.availability,
-      similarProducts: data.similar_products,
+    const apiUrl = `https://apis.ccbp.in/products/${id}`
+    const options = {
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+      method: 'GET',
     }
-    this.setState({productDetails: updatedData, isLoading: false})
+
+    const response = await fetch(apiUrl, options)
+
+    if (response.ok) {
+      const data = await response.json()
+
+      const updatedData = {
+        imageUrl: data.image_url,
+        title: data.title,
+        price: data.price,
+        description: data.description,
+        brand: data.brand,
+        totalReviews: data.total_reviews,
+        rating: data.rating,
+        availability: data.availability,
+        similarProducts: data.similar_products,
+      }
+      this.setState({
+        productDetails: updatedData,
+        isLoading: false,
+        isError: false,
+      })
+    } else {
+      this.setState({isError: true})
+    }
   }
 
   onIncreasingQuantity = () => {
@@ -117,19 +139,50 @@ class ProductItemDetails extends Component {
     )
   }
 
+  renderLoaderView = () => (
+    <div data-testid="loader">
+      <Loader type="ThreeDots" color="#0b69ff" height={80} width={80} />
+    </div>
+  )
+
+  onContinuingShopping = () => {
+    this.getProductDetails()
+  }
+
+  renderFailureView = () => (
+    <div className="failure-view-container">
+      <img
+        src="https://assets.ccbp.in/frontend/react-js/nxt-trendz-error-view-img.png"
+        alt="error view"
+        className="failure-image"
+      />
+      <h1 className="failure-heading">Product Not Found</h1>
+      <button
+        className="continue-btn"
+        type="button"
+        onClick={this.onContinuingShopping}
+      >
+        Continue Shopping
+      </button>
+    </div>
+  )
+
   render() {
-    const {isLoading} = this.state
+    const {isLoading, isError} = this.state
+    let content = null
+
+    if (isError) {
+      content = this.renderFailureView()
+    } else if (isLoading) {
+      content = this.renderLoaderView()
+    } else {
+      content = this.getProductDetails()
+    }
 
     return (
       <div className="product-page-container">
         <Header />
-        {isLoading ? (
-          <div data-testid="loader">
-            <Loader type="ThreeDots" color="#0b69ff" height={80} width={80} />
-          </div>
-        ) : (
-          this.renderProductDetails()
-        )}
+        {content}
       </div>
     )
   }
