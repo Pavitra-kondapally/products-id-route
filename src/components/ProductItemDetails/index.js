@@ -8,8 +8,19 @@ import SimilarProductItem from '../SimilarProductItem'
 import Header from '../Header'
 import './index.css'
 
+const apiStatusConstants = {
+  initial: 'INITIAL',
+  success: 'SUCCESS',
+  failure: 'FAILURE',
+  inProgress: 'IN_PROGRESS',
+}
+
 class ProductItemDetails extends Component {
-  state = {productDetails: {}, isLoading: false, quantity: 1, isError: false}
+  state = {
+    productDetails: {},
+    quantity: 1,
+    apiStatus: apiStatusConstants.initial,
+  }
 
   componentDidMount() {
     this.getProductDetails()
@@ -17,7 +28,7 @@ class ProductItemDetails extends Component {
 
   getProductDetails = async () => {
     this.setState({
-      isLoading: true,
+      apiStatus: apiStatusConstants.inProgress,
     })
     const jwtToken = Cookies.get('jwt_token')
     const {match} = this.props
@@ -33,7 +44,7 @@ class ProductItemDetails extends Component {
 
     const response = await fetch(apiUrl, options)
 
-    if (response.ok) {
+    if (response.ok === true) {
       const data = await response.json()
 
       const updatedData = {
@@ -49,11 +60,13 @@ class ProductItemDetails extends Component {
       }
       this.setState({
         productDetails: updatedData,
-        isLoading: false,
-        isError: false,
+        apiStatus: apiStatusConstants.success,
       })
-    } else {
-      this.setState({isError: true})
+    }
+    if (response.status === 401) {
+      this.setState({
+        apiStatus: apiStatusConstants.failure,
+      })
     }
   }
 
@@ -62,7 +75,10 @@ class ProductItemDetails extends Component {
   }
 
   onDecreasingQuantity = () => {
-    this.setState(prevState => ({quantity: prevState.quantity - 1}))
+    const {quantity} = this.state
+    if (quantity > 1) {
+      this.setState(prevState => ({quantity: prevState.quantity - 1}))
+    }
   }
 
   renderProductDetails = () => {
@@ -87,14 +103,14 @@ class ProductItemDetails extends Component {
             <h1 className="product-title">{title}</h1>
             <p className="product-price">{price}</p>
             <div className="rating-container">
-              <button className="rating-button" type="button">
-                {rating}
+              <div className="rating-button">
+                <p>{rating}</p>
                 <img
                   src="https://assets.ccbp.in/frontend/react-js/star-img.png"
                   className="star-image"
                   alt="star"
                 />
-              </button>
+              </div>
               <p className="reviews-text">{totalReviews} Reviews</p>
             </div>
             <p className="product-description">{description}</p>
@@ -110,16 +126,18 @@ class ProductItemDetails extends Component {
                 data-testid="minus"
                 onClick={this.onDecreasingQuantity}
                 type="button"
+                className="plus-minus-btn"
               >
-                <BsDashSquare />
+                <BsDashSquare className="cart-plus-minus" />
               </button>
               <p>{quantity}</p>
               <button
                 data-testid="plus"
                 onClick={this.onIncreasingQuantity}
                 type="button"
+                className="plus-minus-btn"
               >
-                <BsPlusSquare />
+                <BsPlusSquare className="cart-plus-minus" />
               </button>
             </div>
             <button className="add-to-cart-btn" type="button">
@@ -127,6 +145,7 @@ class ProductItemDetails extends Component {
             </button>
           </div>
         </div>
+        <h1>Similar Products</h1>
         <ul className="similar-products-list">
           {similarProducts.map(eachProduct => (
             <SimilarProductItem
@@ -168,15 +187,21 @@ class ProductItemDetails extends Component {
   )
 
   render() {
-    const {isLoading, isError} = this.state
+    const {apiStatus} = this.state
     let content = null
 
-    if (isError) {
-      content = this.renderFailureView()
-    } else if (isLoading) {
-      content = this.renderLoaderView()
-    } else {
-      content = this.getProductDetails()
+    switch (apiStatus) {
+      case apiStatusConstants.success:
+        content = this.renderProductDetails()
+        break
+      case apiStatusConstants.failure:
+        content = this.renderFailureView()
+        break
+      case apiStatusConstants.inProgress:
+        content = this.renderLoaderView()
+        break
+      default:
+        content = null
     }
 
     return (
